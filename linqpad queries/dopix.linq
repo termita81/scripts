@@ -32,15 +32,14 @@ class Mover
 	string directory;
 	string newDirectory;
 	string filename;
-	string newFilename;
 	string extension;
 	bool isPanorama;
 	bool doIt;
-	DateTime? shootingDate;
 
 	public Mover() : this(false) { }
 	public Mover(bool doIt) { this.doIt = doIt; }
 
+	// unused
 	public void UpdateFoldersNamesByPhotoDates(string root)
 	{
 		foreach (var folder in Directory.EnumerateDirectories(root, "20??.?? *", SearchOption.TopDirectoryOnly))
@@ -80,28 +79,37 @@ class Mover
 	{
 		Console.WriteLine(doIt ? "Actually moving files" : "NOT moving files");
 		Console.WriteLine("\n");
-		var files = Directory.EnumerateFiles(root);
-		foreach (var file in files) // "c:\work\pix\nesortate\Moto\mici\IMG_20170315_132557065.jpg"
+		var fileGroupings = Directory.EnumerateFiles(root)
+			.GroupBy(Path.GetFileNameWithoutExtension);
+		foreach (var group in fileGroupings)
 		{
 			try
 			{
-				fullFilePath = file;
+				fullFilePath = group.FirstOrDefault(file => {
+					var ext = Path.GetExtension(file).Substring(1).ToLowerInvariant();
+					return PhotoExtensions.Contains(ext) ||
+					MovieExtensions.Contains(ext);
+				});
+				if (fullFilePath == null) continue;
 				directory = Path.GetDirectoryName(fullFilePath);
 				filename = Path.GetFileName(fullFilePath); // "IMG_20170315_132557065.jpg"
-				extension = Path.GetExtension(filename).Substring(1);
+				extension = Path.GetExtension(filename).Substring(1).ToLowerInvariant(); // remove "." in front of extension
 
-				shootingDate = ExtractDateFromFile();
+				var shootingDate = ExtractDateFromFile();
 				if (shootingDate == null)
 				{
 					Console.WriteLine($"Skipping '{fullFilePath}': could not retrieve shooting date.");
 					continue;
 				}
 
-				MakeSureDirExists();
+				MakeSureDirExists(shootingDate.Value);
 
-				newFilename = Path.Combine(newDirectory, filename);
-
-				MoveFile(file, newFilename);
+				foreach (var file in group)
+				{
+					var fileInGroup = Path.GetFileName(file);
+					var newFilename = Path.Combine(newDirectory, fileInGroup);
+					MoveFile(file, newFilename);
+				}
 			}
 			catch (Exception ex)
 			{
@@ -113,9 +121,9 @@ class Mover
 
 	DateTime? ExtractDateFromFile()
 	{
-		if (PhotoExtensions.Contains(extension.ToLowerInvariant()))
+		if (PhotoExtensions.Contains(extension))
 			return ExtractDateFromPhoto();
-		if (MovieExtensions.Contains(extension.ToLowerInvariant()))
+		if (MovieExtensions.Contains(extension))
 			return ExtractDateFromMovie();
 		return null;
 	}
@@ -198,11 +206,11 @@ class Mover
 		Console.WriteLine(message);
 	}
 
-	string MakeSureDirExists()
+	string MakeSureDirExists(DateTime shootingDate)
 	{
-		var year = shootingDate.Value.Year;
-		var month = shootingDate.Value.Month;
-		var day = shootingDate.Value.Day;
+		var year = shootingDate.Year;
+		var month = shootingDate.Month;
+		var day = shootingDate.Day;
 		var requestedActualDir = $"{year}.{month:D2}.{day:d2}";
 		newDirectory = Path.Combine(directory, requestedActualDir);
 
