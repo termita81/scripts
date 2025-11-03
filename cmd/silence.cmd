@@ -1,0 +1,1 @@
+ffmpeg -i %1 -an -vcodec copy %1_silent.mp4

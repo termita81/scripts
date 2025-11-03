@@ -1,0 +1,1 @@
+ffmpeg -i %1 -acodec mp3 "%~n1.mp3"

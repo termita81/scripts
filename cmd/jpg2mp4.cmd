@@ -1,0 +1,1 @@
+ffmpeg -framerate 24 -i pb%04d.jpg output.mp4
