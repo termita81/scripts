@@ -93,7 +93,7 @@ function printSummary(principal, rate, years, monthly, overrides, schedule) {
     lines.push('Total Interest:     ' + pad(formatCurrency(last.totalInterest), 14, true));
   }
   // APY: effective annual return after compounding (always higher than nominal rate for monthly compounding)
-  lines.push('Effective APY:      ' + pad(formatPercent(apy), 14, true));
+  lines.push('Effective Annual Percentage Yield:      ' + pad(formatPercent(apy), 14, true));
   lines.push('');
 
   lines.forEach(function(l) { console.log(l); });
@@ -202,15 +202,15 @@ function printHelp(isCLI) {
       'Usage: node interest-calculator.js [options]',
       '',
       'Options:',
-      '  --principal <n>       Starting balance            (default: ' + DEFAULTS.principal + ')',
-      '  --rate <n>            Annual interest rate in %   (default: ' + DEFAULTS.rate + ')',
-      '  --years <n>           Duration in years           (default: ' + DEFAULTS.years + ')',
-      '  --monthly <n>         Fixed deposit each month    (default: ' + DEFAULTS.monthly + ')',
-      '  --override "M:N,..."  Per-month deposit overrides (e.g. "4:50,8:342")',
-      '  --verbose             Show month-by-month breakdown table',
-      '  --json                Output results as JSON',
-      '  --csv                 Output schedule as CSV',
-      '  --help                Show this help message',
+      '  -p, --principal <n>       Starting balance            (default: ' + DEFAULTS.principal + ')',
+      '  -r, --rate <n>            Annual interest rate in %   (default: ' + DEFAULTS.rate + ')',
+      '  -y, --years <n>           Duration in years           (default: ' + DEFAULTS.years + ')',
+      '  -m, --monthly <n>         Fixed deposit each month    (default: ' + DEFAULTS.monthly + ')',
+      '  -o, --override "M:N,..."  Per-month deposit overrides (e.g. "4:50,8:342")',
+      '  -v, --verbose             Show month-by-month breakdown table',
+      '  -j, --json                Output results as JSON',
+      '  -c, --csv                 Output schedule as CSV',
+      '  -h, --help                Show this help message',
       '',
       'Examples:',
       '  node interest-calculator.js --principal 10000 --rate 5 --years 10',
@@ -256,8 +256,12 @@ function parseArgs(argv) {
     csv: false
   };
 
+  var shorthands = { p: 'principal', r: 'rate', y: 'years', m: 'monthly', o: 'override', v: 'verbose', j: 'json', c: 'csv', h: 'help' };
+
   for (var i = 0; i < argv.length; i++) {
-    var key = argv[i].replace(/^--/, '');
+    var raw = argv[i];
+    var key = raw.replace(/^-+/, '');
+    if (/^-[a-z]$/.test(raw)) key = shorthands[key] || key;
     if (key === 'verbose' || key === 'json' || key === 'csv' || key === 'help') {
       if (key === 'verbose') opts.verbose = true;
       else if (key === 'json') opts.json = true;
@@ -274,7 +278,7 @@ function parseArgs(argv) {
           var parts = pair.split(':');
           opts.overrides[parseInt(parts[0], 10)] = parseFloat(parts[1]);
         });
-      } else { console.error('Unknown option: --' + key); }
+      } else { console.error('Unknown option: ' + raw); }
       i++;
     }
   }
