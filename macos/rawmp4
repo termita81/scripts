@@ -1,0 +1,31 @@
+#!/bin/bash
+
+# Set the base directory
+BASE_DIR=.
+
+# Loop through all files in the base directory
+for file in "$BASE_DIR"/*; do
+  # Check if it's a file
+  if [ -f "$file" ]; then
+    # Get the filename and extension
+    filename=$(basename "$file")
+    extension="${filename##*.}"
+    filename_no_ext="${filename%.*}"
+
+    # Create the date directory
+    date_dir="$BASE_DIR/${filename_no_ext}$(date +'%Y.%m.%d')"
+    mkdir -p "$date_dir"
+
+    # Move raw files to the raw subdirectory
+    if [[ "$extension" == "RW2" || "$extension" == "DNG" ]]; then
+      raw_dir="$date_dir/raw"
+      mkdir -p "$raw_dir"
+      mv "$file" "$raw_dir/"
+    # Move movie files to the mp4 subdirectory
+    elif [[ "$extension" == "MOV" ]]; then
+      mp4_dir="$date_dir/mp4"
+      mkdir -p "$mp4_dir"
+      mv "$file" "$mp4_dir/"
+    fi
+  fi
+done
