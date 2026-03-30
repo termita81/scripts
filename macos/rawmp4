@@ -16,6 +16,12 @@ if [[ ! -d "$BASE_DIR" ]]; then
   exit 1
 fi
 
+# Create destination directories once
+RAW_DIR="$BASE_DIR/raw"
+MP4_DIR="$BASE_DIR/mp4"
+mkdir -p "$RAW_DIR"
+mkdir -p "$MP4_DIR"
+
 # Loop through all files in the base directory
 for file in "$BASE_DIR"/*; do
   # Skip if not a regular file
@@ -26,22 +32,19 @@ for file in "$BASE_DIR"/*; do
   extension="${filename##*.}"
   filename_no_ext="${filename%.*}"
 
-  # Create the date directory
-  date_dir="$BASE_DIR/${filename_no_ext}$(date +'%Y.%m.%d')"
-  mkdir -p "$date_dir"
+  # Skip JPG/JPEG files (they are the reference for the raw folder location)
+  if [[ "$extension" == "JPG" || "$extension" == "JPEG" ]]; then
+    continue
+  fi
 
-  # Move raw files to the raw subdirectory
+  # Copy raw files to the raw subdirectory
   if [[ "$extension" == "RW2" || "$extension" == "DNG" ]]; then
-    raw_dir="$date_dir/raw"
-    mkdir -p "$raw_dir"
-    mv -n "$file" "$raw_dir/"
-    echo "Moved raw file '$filename' to '$raw_dir/'"
+    cp -n "$file" "$RAW_DIR/"
+    echo "Copied raw file '$filename' to '$RAW_DIR/'"
 
-  # Move movie files to the mp4 subdirectory
+  # Copy movie files to the mp4 subdirectory
   elif [[ "$extension" == "MOV" ]]; then
-    mp4_dir="$date_dir/mp4"
-    mkdir -p "$mp4_dir"
-    mv -n "$file" "$mp4_dir/"
-    echo "Moved movie file '$filename' to '$mp4_dir/'"
+    cp -n "$file" "$MP4_DIR/"
+    echo "Copied movie file '$filename' to '$MP4_DIR/'"
   fi
 done
