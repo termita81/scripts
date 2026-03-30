@@ -1,31 +1,47 @@
-#!/bin/bash
+#!/usr/bin/env bash
+# rawmp4 – Organise raw image and movie files into dated folders
 
-# Set the base directory
-BASE_DIR=.
+# Exit on errors, unset variables, and pipe failures
+set -euo pipefail
+
+# Enable case‑insensitive globbing and allow empty glob results
+shopt -s nocasematch nullglob
+
+# Default base directory is the current directory
+BASE_DIR="${1:-.}"
+
+# Ensure the base directory exists
+if [[ ! -d "$BASE_DIR" ]]; then
+  echo "Error: Directory '$BASE_DIR' does not exist." >&2
+  exit 1
+fi
 
 # Loop through all files in the base directory
 for file in "$BASE_DIR"/*; do
-  # Check if it's a file
-  if [ -f "$file" ]; then
-    # Get the filename and extension
-    filename=$(basename "$file")
-    extension="${filename##*.}"
-    filename_no_ext="${filename%.*}"
+  # Skip if not a regular file
+  [[ -f "$file" ]] || continue
 
-    # Create the date directory
-    date_dir="$BASE_DIR/${filename_no_ext}$(date +'%Y.%m.%d')"
-    mkdir -p "$date_dir"
+  # Extract filename and extension
+  filename=$(basename "$file")
+  extension="${filename##*.}"
+  filename_no_ext="${filename%.*}"
 
-    # Move raw files to the raw subdirectory
-    if [[ "$extension" == "RW2" || "$extension" == "DNG" ]]; then
-      raw_dir="$date_dir/raw"
-      mkdir -p "$raw_dir"
-      mv "$file" "$raw_dir/"
-    # Move movie files to the mp4 subdirectory
-    elif [[ "$extension" == "MOV" ]]; then
-      mp4_dir="$date_dir/mp4"
-      mkdir -p "$mp4_dir"
-      mv "$file" "$mp4_dir/"
-    fi
+  # Create the date directory
+  date_dir="$BASE_DIR/${filename_no_ext}$(date +'%Y.%m.%d')"
+  mkdir -p "$date_dir"
+
+  # Move raw files to the raw subdirectory
+  if [[ "$extension" == "RW2" || "$extension" == "DNG" ]]; then
+    raw_dir="$date_dir/raw"
+    mkdir -p "$raw_dir"
+    mv -n "$file" "$raw_dir/"
+    echo "Moved raw file '$filename' to '$raw_dir/'"
+
+  # Move movie files to the mp4 subdirectory
+  elif [[ "$extension" == "MOV" ]]; then
+    mp4_dir="$date_dir/mp4"
+    mkdir -p "$mp4_dir"
+    mv -n "$file" "$mp4_dir/"
+    echo "Moved movie file '$filename' to '$mp4_dir/'"
   fi
 done
