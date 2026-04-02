@@ -1,0 +1,4 @@
+[[mgr.prepend_keymap]]
+on = [ "<C-l>" ]
+run = 'shell "lazygit" --block'
+desc = "Open lazygit"

@@ -1,0 +1,7 @@
+#!/bin/bash
+
+# move
+exiftool -r -d '%Y.%m.%d' '-Directory<$DateTimeOriginal' $1
+
+# copy
+# exiftool -r -o . -d '%Y.%m.%d' '-Directory<$DateTimeOriginal' $1 
