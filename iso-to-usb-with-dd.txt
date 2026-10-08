@@ -1,0 +1,8 @@
+From https://blog.christopherhoelter.com/write-iso-to-usb
+
+The common unix dd utility can be used to write ISOs to USB drives without needing additional software. These are the steps for how to use it on macOS specifically, but it's very similar on other unix based systems. Proceed with caution, dd can overwrite an entire disk so make sure you target the correct one.
+
+1. diskutil list # identify the target disk (the USB) that you want to write to, something like "/dev/disk8".
+2. diskutil unmountDisk /dev/disk8 # unmount the identified target disk.
+3. sudo dd if=<path-to-file.iso> of=/dev/rdisk8 bs=1m status=progress # this will write the iso to the target disk. Note that this is using "rdisk8" with the r prefix for raw disk which makes this faster for writing an image.
+4. diskutil eject /dev/disk8 # to eject the USB drive when done
