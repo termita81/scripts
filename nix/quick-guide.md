@@ -45,7 +45,7 @@ Finish: run `reboot`.
 
 Before it restarts, eject the ISO in UTM (`CD/DVD` → `Clear`), or it will boot the installer again.
 
-At this time (2026/10/22) rebooting leads to black screens, so halt/poweroff and then power back on instead of restarting.
+At this time (2026/10/22) rebooting leads to black screens, so halt/poweroff and then power back on instead of restarting. Add a serial device in UTM (`Devices` → `New` → `Serial`, mode `Built-in terminal`). Boot messages and a login prompt will show up in a separate serial window even if the display stays inactive. That will tell whether the system is booting fine and only the display is the problem, or whether it fails earlier.
 
 After first boot: log in as root, run `passwd boss` to set your user password, then manage everything through `/etc/nixos/configuration.nix` and `sudo nixos-rebuild switch`.
 
