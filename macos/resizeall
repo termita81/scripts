@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+
+# https://imagemagick.org/mogrify/
+# Each part does this:
+# `mkdir -p resized` creates the output folder if needed; it doesn’t complain if the folder already exists
+# `magick mogrify` runs ImageMagick’s batch-processing command on the files that follow
+# `-path resized` writes the results into resized instead of replacing the originals. Without -path (or another output setting), mogrify normally overwrites the input files
+# `-auto-orient` applies orientation metadata, such as the rotation stored by a phone camera, before resizing
+# `-resize '3600x3600>'` fits each image within a 3600 × 3600 pixel box, preserving its aspect ratio. The > says to shrink only, not enlarge
+# `*.jpg` is expanded by the macOS shell to the matching JPEG files in the current directory. It covers lowercase .jpg files directly in that directory, not files in subfolders
+# 
+# For example, a 5400 × 3600 landscape image becomes 3600 × 2400; a 3600 × 5400 portrait image becomes 2400 × 3600. The box is a maximum, not a demand that every output be exactly 3600 × 3600 
+
+# Common -resize geometries
+# The geometry is the value after -resize; put it in quotes so shell characters like > aren’t treated as shell redirection.
+# Geometry	Effect
+# 3600x3600	Fit inside this box, preserving aspect ratio. Enlarge smaller images as needed.
+# 3600x3600>	Fit inside the box, but only shrink images that exceed it.
+# 3600x3600<	Fit inside the box, but only enlarge images that are smaller than it.
+# 3600x	Set the width to 3600 and calculate the height to preserve the ratio.
+# x3600	Set the height to 3600 and calculate the width.
+# 50%	Resize both dimensions to 50% of their original size.
+# 3600x3600!	Force the exact dimensions, even if that distorts the aspect ratio.
+# 3600x3600^	Scale to cover the whole box, preserving the ratio; one dimension may exceed 3600. Often paired with cropping, such as -gravity center -extent 3600x3600.
+# 3600x3600@	Choose dimensions whose total pixel area is at most about 3600 × 3600 pixels; it does not mean “maximum side 3600.”
+
+
+mkdir -p resized
+magick mogrify -path resized -auto-orient -resize '3600x3600>' *.jpg
